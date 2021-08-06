@@ -19,11 +19,13 @@ class FIRFilter:
         for _ in range(self.n):
             data_buffer.append(0)
         for val in data_stream:
-            data_buffer = [val] + data_buffer[:-1]  # shift the buffer by 1
+            data_buffer = [val] + data_buffer[:-1]  # right shift the buffer by 1
             sum = 0
             for i in range(self.n):
                 sum += data_buffer[i] * self.coeff[i]
             output.append(sum/self.normal)
+        for _ in range(int(self.n/2)):
+            output = output[1:] + [0]
         return output
 
     def detect_zero_crossings(self, data):
@@ -44,18 +46,29 @@ class FIRFilter:
             if data[i] < min_val:
                 min_val = data[i]
                 min_i = i
-        print(max_i, min_i)
-        return [int((min_i-max_i)/2 + max_i)]
+        return int((min_i-max_i)/2 + max_i)
 
 
 if __name__ == '__main__':
-    img = np.transpose(cv.imread("misc/pcog liveimages/pcog liveimages/sphere 6mm 5000us.png", cv.IMREAD_GRAYSCALE))
-    fir = FIRFilter(5, [2, 1, 0, -1, -2], 10)
-    v = fir.convolve(img[1000])
+    img = np.transpose(cv.imread("misc/pcog liveimages/pcog liveimages/sphere 6mm 100us.png", cv.IMREAD_GRAYSCALE))
+    fir = FIRFilter(5, [-3, 12, 17, 12, -3], 35)
+    fir2 = FIRFilter(5, [2, 1, 0, -1, -2], 10)
+    print(max(img[498]))
+    s = fir.convolve(img[498])
+    # threshold = int(0.8*max(img[498]))
+    # for i in range(len(s)):
+    #     if s[i] < threshold:
+    #         s[i] = 0
+    # print(max(s))
+    v = fir2.convolve(s)
     zeros = fir.detect_zero_crossings(v)
-    fig, ax = plt.subplots(2)
-    ax[0].plot(img[1000])
-    ax[1].plot(v)
-    ax[1].scatter(zeros, list(np.zeros(len(zeros))), c='red')
+    fig, ax = plt.subplots(3)
+    ax[0].annotate("raw", xy=(0.9, 0.9))
+    ax[0].plot(img[498])
+    ax[1].annotate("smoothed+culled", xy=(0.9, 0.9))
+    ax[1].plot(s)
+    ax[2].annotate("derivative", xy=(0.9, 0.9))
+    ax[2].plot(v)
+    ax[2].scatter(zeros, [0], c='red')
     print(fir.detect_zero_crossings(v))
     plt.show()
