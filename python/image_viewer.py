@@ -121,6 +121,20 @@ class ImageViewer:
         self.master.destroy()
         sys.exit(0)
 
+    def _image_cut(self):
+        self.image_sections = [0]
+        stop = False
+        while(not stop):
+            if (self.image_sections[-1] + 10) <= self.image.shape[0]:
+                self.image_sections.append(self.image_sections[-1] + 10)
+            else:
+                for i in range(10):
+                    if (self.image_sections[-1] + (9 - i)) <= self.image.shape[0]:
+                        self.image_sections.append(self.image_sections[-1] + 9 - i)
+                        stop = True
+                        break
+        self.image_sections = self.image_sections[1:]
+
     def _convert_to_PIL_image(self, img):
         return ImageTk.PhotoImage(image=Image.fromarray(img))
 
