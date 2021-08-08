@@ -5,6 +5,9 @@ from tkinter import filedialog
 import cv2 as cv
 from PIL import ImageTk, Image
 import numpy as np
+import matplotlib
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
 import re
 from filter import FIRFilter
 
@@ -17,6 +20,7 @@ def apply_filter(img):
 
 class ImageViewer:
     def __init__(self, index='') -> None:
+        matplotlib.use("TkAgg")
         self.master = tk.Tk()
         self.master.title("Image Viewer " + index)
         self.setup_viewer()
@@ -87,6 +91,20 @@ class ImageViewer:
         self.image = self._resize_image(self.image, self.filtered_image_label)
         self.image = self._convert_to_PIL_image(self.image)
         self.filtered_image_label.config(image=self.image)
+        self.plot_zeros(zeros)
+
+    def plot_zeros(self, zeros):
+        fig = Figure(figsize=(5, 5), dpi=100)
+        self.zeros_plot = fig.add_subplot(111)
+        self.zeros_plot.plot(zeros)
+        self.zeros_plot.set_title("vertical position of the laser beam")
+
+        zeros_canvas = FigureCanvasTkAgg(fig, self.master)
+        zeros_canvas.draw()
+        toolbar = NavigationToolbar2Tk(zeros_canvas, self.master, pack_toolbar=False)
+        toolbar.place(relwidth=0.4, relx=0.6, rely=0.83)
+        toolbar.update()
+        zeros_canvas.get_tk_widget().place(relheight=0.3, relwidth=0.4, relx=0.6, rely=0.53)
 
     def save_filtered_img(self, *_args):
         img_name = re.findall('(?<=\/)[\w\s.]*(?=\.png)', self.image_path)[0]
