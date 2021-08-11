@@ -76,16 +76,18 @@ class ImageViewer:
         zeros = []
         for column in range(len(self.image)):
             s = self.filter_1.convolve(self.image[column])
-            # threshold = int(0.8*max(self.image[column]))
-            # for i in range(len(self.image[column])):
-            #     if s[i] < threshold:
-            #         s[i] = 0
+            threshold = int(0.5*max(self.image[column]))
             s = self.filter_2.convolve(s)
-            zeros.append(self.filter_2.detect_zero_crossings(s))
+            tmp_zeros = []
+            for val in self.filter_2.detect_zero_crossings(s):
+                if self.image[column][val] > threshold:
+                    tmp_zeros.append(val)
+            zeros.append(tmp_zeros)
         self.image = np.transpose(self.image)
         self.image = cv.cvtColor(self.image, cv.COLOR_GRAY2RGB)
         for i in range(self.image.shape[1]):
-            self.image[zeros[i]][i] = [255, 0, 0]
+            for j in range(len(zeros[i])):
+                self.image[zeros[i][j]][i] = [255, 0, 0]
 
         self.filtered_fullrez_img = np.copy(self.image)
         self.image = self._resize_image(self.image, self.filtered_image_label)
@@ -96,7 +98,13 @@ class ImageViewer:
     def plot_zeros(self, zeros):
         fig = Figure(figsize=(5, 5), dpi=100)
         self.zeros_plot = fig.add_subplot(111)
-        self.zeros_plot.plot(zeros)
+        x = []
+        y = []
+        for column in range(len(zeros)):
+            for row in zeros[column]:
+                x.append(column)
+                y.append(row)
+        self.zeros_plot.scatter(x, y, c='red')
         self.zeros_plot.set_title("vertical position of the laser beam")
 
         zeros_canvas = FigureCanvasTkAgg(fig, self.master)
