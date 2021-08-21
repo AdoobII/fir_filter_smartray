@@ -29,20 +29,8 @@ class FIRFilter:
         return output
 
     def detect_zero_crossings(self, data):
-        # max_val = 0
-        # min_val = 0
-        # max_i = 0
-        # min_i = 0
-        # for i in range(len(data)):
-        #     if data[i] >= max_val:
-        #         max_val = data[i]
-        #         max_i = i
-        #     if data[i] < min_val:
-        #         min_val = data[i]
-        #         min_i = i
-        # return int((min_i-max_i)/2 + max_i)
         zeros = []
-        window_size = 15
+        window_size = 30
         start = 0
         stop = window_size - 1
         stop_limit = len(data)
@@ -54,46 +42,64 @@ class FIRFilter:
                 points[1][0] += start
                 start += 1
                 stop += 1
-            else:
+            elif start < (stop_limit-1):
                 points = self._find_min_max(data[start:stop_limit-1])
                 points[0][0] += start
                 points[1][0] += start
                 finding_zeros = False
-            zeros.append(int((points[0][0]+points[1][0])/2))
+            else:
+                finding_zeros = False
+
+            # scaling_factor = ((y2 - y1) / (y2 + y1)) + 1
+            scaling_factor = ((abs(points[1][1])-abs(points[0][1])) / (abs(points[1][1]) +
+                              abs(points[0][1]) + int((not points[1][1]) & (not points[0][1])))) + 1
+            # zero = scaling_factor * (x2-x1) + x1
+            zero = (scaling_factor * (points[1][0] - points[0][0])) + points[0][0]
+            zero = int(zero)
+            if zero > points[1][0]:
+                zero = points[1][0]
+            elif zero < points[0][0]:
+                zero = points[0][0]
+            if zero not in zeros:
+                zeros.append(zero)
         return zeros
 
+    def cull_zeros(self, data, zeros, threshold_factor):
+        new_zeros = []
+        max_val = int(max(data))
+        for val in zeros:
+            if data[val] > threshold_factor*max_val:
+                new_zeros.append(val)
+        return new_zeros
+
     def _find_min_max(self, sequence):
-        min_val = min(sequence)
-        max_val = max(sequence)
+        y1 = max(sequence)
+        y2 = min(sequence)
         for index, val in enumerate(sequence):
-            if val == min_val:
-                min_index = index
-            if val == max_val:
-                max_index = index
-        return([[min_index, min_val], [max_index, max_val]])
+            if val == y2:
+                x2 = index
+            if val == y1:
+                x1 = index
+        if x2 > x1:
+            return([[x1, y1], [x2, y2]])
+        else:
+            return([[x2, y2], [x1, y1]])
 
 
 if __name__ == '__main__':
-    img = np.transpose(cv.imread("misc/pcog liveimages/pcog liveimages/weld 5000us.png", cv.IMREAD_GRAYSCALE))
+    img = np.transpose(cv.imread("misc/pcog liveimages/pcog liveimages/aluwaves 5000us.png", cv.IMREAD_GRAYSCALE))
     fir = FIRFilter(5, [-3, 12, 17, 12, -3], 35)
     fir2 = FIRFilter(5, [2, 1, 0, -1, -2], 10)
-    # print(max(img[1165]))
-    s = fir.convolve(img[1165])
-    # threshold = int(0.8*max(img[498]))
-    # for i in range(len(s)):
-    #     if s[i] < threshold:
-    #         s[i] = 0
-    # print(max(s))
+    s = fir.convolve(img[1071])
+
     v = fir2.convolve(s)
     tmp_zeros = fir.detect_zero_crossings(v)
-    zeros = []
-    for val in tmp_zeros:
-        if img[1165][val] > int(0.5*255):
-            zeros.append(val)
+    print(len(tmp_zeros))
+    zeros = fir.cull_zeros(img[1071], tmp_zeros, 0.8)
     print(len(zeros))
     fig, ax = plt.subplots(3)
     ax[0].annotate("raw", xy=(0.9, 0.9))
-    ax[0].plot(img[1165])
+    ax[0].plot(img[1071])
     ax[1].annotate("smoothed+culled", xy=(0.9, 0.9))
     ax[1].plot(s)
     ax[2].annotate("derivative", xy=(0.9, 0.9))

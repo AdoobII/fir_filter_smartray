@@ -12,14 +12,11 @@ import re
 from filter import FIRFilter
 
 
-def apply_filter(img):
-
-    for column in img:
-        pass
-
-
 class ImageViewer:
     def __init__(self, index='') -> None:
+        # vars
+        self.THRESHOLD = 0.8
+
         matplotlib.use("TkAgg")
         self.master = tk.Tk()
         self.master.title("Image Viewer " + index)
@@ -76,13 +73,9 @@ class ImageViewer:
         zeros = []
         for column in range(len(self.image)):
             s = self.filter_1.convolve(self.image[column])
-            threshold = int(0.5*max(self.image[column]))
             s = self.filter_2.convolve(s)
-            tmp_zeros = []
-            for val in self.filter_2.detect_zero_crossings(s):
-                if self.image[column][val] > threshold:
-                    tmp_zeros.append(val)
-            zeros.append(tmp_zeros)
+            zeros.append(self.filter_2.cull_zeros(self.image[column],
+                         self.filter_2.detect_zero_crossings(s), self.THRESHOLD))
         self.image = np.transpose(self.image)
         self.image = cv.cvtColor(self.image, cv.COLOR_GRAY2RGB)
         for i in range(self.image.shape[1]):
