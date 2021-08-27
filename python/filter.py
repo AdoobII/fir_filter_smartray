@@ -30,7 +30,9 @@ class FIRFilter:
 
     def detect_zero_crossings(self, data):
         zeros = []
-        window_size = 30
+        window_size = 15
+        max_amt_zeros = 6
+        dz = 10
         start = 0
         stop = window_size - 1
         stop_limit = len(data)
@@ -54,7 +56,7 @@ class FIRFilter:
             scaling_factor = ((abs(points[1][1])-abs(points[0][1])) / (abs(points[1][1]) +
                               abs(points[0][1]) + int((not points[1][1]) & (not points[0][1])))) + 1
             # zero = scaling_factor * (x2-x1) + x1
-            zero = (scaling_factor * (points[1][0] - points[0][0])) + points[0][0]
+            zero = (scaling_factor * (points[1][0] - points[0][0])/2) + points[0][0]
             zero = int(zero)
             if zero > points[1][0]:
                 zero = points[1][0]
@@ -64,6 +66,26 @@ class FIRFilter:
                 zeros.append(zero)
         return zeros
 
+    def cluster_zeros(self, zeros, pixle_width):
+        """
+            zeros must be ordered from lowest to highest
+        """
+        tmp_zeros = []
+        clustered_zeros = []
+        segment_start = 0
+        for i in range(len(zeros)):
+            if zeros[i] < (zeros[segment_start] + pixle_width):
+                tmp_zeros.append(zeros[i])
+            else:
+                if len(tmp_zeros):
+                    clustered_zeros.append(int(sum(tmp_zeros)/len(tmp_zeros)))
+                    tmp_zeros = []
+                    tmp_zeros.append(zeros[i])
+                    segment_start = i
+        if len(tmp_zeros):
+            clustered_zeros.append(int(sum(tmp_zeros)/len(tmp_zeros)))
+        return clustered_zeros
+
     def cull_zeros(self, data, zeros, threshold_factor):
         new_zeros = []
         max_val = int(max(data))
@@ -71,6 +93,16 @@ class FIRFilter:
             if data[val] > threshold_factor*max_val:
                 new_zeros.append(val)
         return new_zeros
+
+    def cull_data(self, data, threshold_factor):
+        culled_data = []
+        cutoff = int(threshold_factor * max(data))
+        for val in data:
+            if val > cutoff:
+                culled_data.append(val)
+            else:
+                culled_data.append(0)
+        return culled_data
 
     def _find_min_max(self, sequence):
         y1 = max(sequence)
@@ -87,22 +119,26 @@ class FIRFilter:
 
 
 if __name__ == '__main__':
-    img = np.transpose(cv.imread("misc/pcog liveimages/pcog liveimages/aluwaves 5000us.png", cv.IMREAD_GRAYSCALE))
+    img = np.transpose(cv.imread("misc/pcog liveimages/pcog liveimages/weld 5000us.png", cv.IMREAD_GRAYSCALE))
     fir = FIRFilter(5, [-3, 12, 17, 12, -3], 35)
     fir2 = FIRFilter(5, [2, 1, 0, -1, -2], 10)
-    s = fir.convolve(img[1071])
-
-    v = fir2.convolve(s)
-    tmp_zeros = fir.detect_zero_crossings(v)
+    fir3 = FIRFilter(21, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1], 121)
+    smoothed_data = fir.convolve(img[1079])
+    smoothed_data = fir3.convolve(smoothed_data)
+    # culled_data = fir.cull_data(smoothed_data, 0.8)
+    culled_data = smoothed_data
+    differentiated_data = fir2.convolve(culled_data)
+    tmp_zeros = fir2.detect_zero_crossings(differentiated_data)
     print(len(tmp_zeros))
-    zeros = fir.cull_zeros(img[1071], tmp_zeros, 0.8)
+    zeros = fir.cull_zeros(img[1079], tmp_zeros, 0.8)
+    zeros = fir2.cluster_zeros(zeros, 20)
     print(len(zeros))
     fig, ax = plt.subplots(3)
     ax[0].annotate("raw", xy=(0.9, 0.9))
-    ax[0].plot(img[1071])
+    ax[0].plot(img[1079])
     ax[1].annotate("smoothed+culled", xy=(0.9, 0.9))
-    ax[1].plot(s)
+    ax[1].plot(culled_data)
     ax[2].annotate("derivative", xy=(0.9, 0.9))
-    ax[2].plot(v)
+    ax[2].plot(differentiated_data)
     ax[2].scatter(zeros, [0 for i in range(len(zeros))], c='red')
     plt.show()
