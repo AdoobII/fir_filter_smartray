@@ -53,10 +53,10 @@ class FIRFilter:
                 finding_zeros = False
 
             # scaling_factor = ((y2 - y1) / (y2 + y1)) + 1
-            scaling_factor = ((abs(points[1][1])-abs(points[0][1])) / (abs(points[1][1]) +
-                              abs(points[0][1]) + int((not points[1][1]) & (not points[0][1])))) + 1
+            # scaling_factor = ((abs(points[1][1])-abs(points[0][1])) / (abs(points[1][1]) +
+            #                   abs(points[0][1]) + int((not points[1][1]) & (not points[0][1])))) + 1
             # zero = scaling_factor * (x2-x1) + x1
-            zero = (scaling_factor * (points[1][0] - points[0][0])/2) + points[0][0]
+            zero = (1 * (points[1][0] - points[0][0])/2) + points[0][0]
             zero = int(zero)
             if zero > points[1][0]:
                 zero = points[1][0]
