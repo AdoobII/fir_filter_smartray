@@ -74,8 +74,8 @@ class ImageViewer:
         for column in range(len(self.image)):
             s = self.filter_1.convolve(self.image[column])
             # s = self.filter_1.cull_data(s, self.THRESHOLD)
-            s = self.filter_3.convolve(s)
             s = self.filter_2.convolve(s)
+            s = self.filter_2.cull_data(s, self.THRESHOLD)
             column_zeros = self.filter_2.detect_zero_crossings(s)
             column_zeros = self.filter_2.cull_zeros(self.image[column], column_zeros, self.THRESHOLD)
             column_zeros = self.filter_2.cluster_zeros(column_zeros, 20)
@@ -121,7 +121,6 @@ class ImageViewer:
     def create_filters(self):
         self.filter_1 = FIRFilter(5, [-3, 12, 17, 12, -3], 35)
         self.filter_2 = FIRFilter(5, [2, 1, 0, -1, -2], 10)
-        self.filter_3 = FIRFilter(21, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1], 121)
 
     def close(self, *_args):
         self.master.destroy()

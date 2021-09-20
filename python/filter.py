@@ -98,7 +98,7 @@ class FIRFilter:
         culled_data = []
         cutoff = int(threshold_factor * max(data))
         for val in data:
-            if val > cutoff:
+            if abs(val) > cutoff:
                 culled_data.append(val)
             else:
                 culled_data.append(0)
@@ -120,22 +120,22 @@ class FIRFilter:
 
 if __name__ == '__main__':
     img = np.transpose(cv.imread("misc/pcog liveimages/pcog liveimages/weld 5000us.png", cv.IMREAD_GRAYSCALE))
-    fir = FIRFilter(5, [-3, 12, 17, 12, -3], 35)
-    fir2 = FIRFilter(5, [2, 1, 0, -1, -2], 10)
-    fir3 = FIRFilter(21, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1], 121)
-    smoothed_data = fir.convolve(img[1079])
-    smoothed_data = fir3.convolve(smoothed_data)
+    fir = FIRFilter(5, [-3, 12, 17, 12, -3], 1)
+    fir2 = FIRFilter(5, [2, 1, 0, -1, -2], 1)
+    smoothed_data = fir.convolve(img[1100])
     # culled_data = fir.cull_data(smoothed_data, 0.8)
     culled_data = smoothed_data
     differentiated_data = fir2.convolve(culled_data)
+    differentiated_data = fir2.cull_data(differentiated_data, 0.8)
+    # differentiated_d2ata = [int(i/512) for i in differentiated_data]
     tmp_zeros = fir2.detect_zero_crossings(differentiated_data)
     print(len(tmp_zeros))
-    zeros = fir.cull_zeros(img[1079], tmp_zeros, 0.8)
+    zeros = fir.cull_zeros(img[1100], tmp_zeros, 0.8)
     zeros = fir2.cluster_zeros(zeros, 20)
     print(len(zeros))
     fig, ax = plt.subplots(3)
     ax[0].annotate("raw", xy=(0.9, 0.9))
-    ax[0].plot(img[1079])
+    ax[0].plot(img[1100])
     ax[1].annotate("smoothed+culled", xy=(0.9, 0.9))
     ax[1].plot(culled_data)
     ax[2].annotate("derivative", xy=(0.9, 0.9))
