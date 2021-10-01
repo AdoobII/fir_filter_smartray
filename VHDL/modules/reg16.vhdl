@@ -16,7 +16,7 @@ BEGIN
     reg16_proc : PROCESS (CLOCK, RESET)
     BEGIN
         IF RESET = '1' THEN
-            Q <= X"0000";
+            Q <= (OTHERS => '0');
         ELSIF (CLOCK = '1' AND CLOCK'EVENT) THEN
             IF ENABLE = '1' THEN
                 Q <= D;
