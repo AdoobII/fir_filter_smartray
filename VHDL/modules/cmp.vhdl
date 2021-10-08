@@ -6,48 +6,48 @@ USE ieee.numeric_std.ALL;
 --  if I_1 < I_2 on the positive edge of the clock.
 
 ENTITY cmp IS
-    GENERIC (
-        DATA_WIDTH : INTEGER := 16
-    );
-    PORT (
-        CLK : IN STD_LOGIC;
-        RST : IN STD_LOGIC;
-        EN : IN STD_LOGIC;
+  GENERIC (
+    DATA_WIDTH : INTEGER := 16
+  );
+  PORT (
+    CLK : IN STD_LOGIC;
+    RST : IN STD_LOGIC;
+    EN : IN STD_LOGIC;
 
-        I_1 : IN unsigned ((DATA_WIDTH - 1) DOWNTO 0);
-        I_2 : IN unsigned ((DATA_WIDTH - 1) DOWNTO 0);
+    I_1 : IN unsigned ((DATA_WIDTH - 1) DOWNTO 0);
+    I_2 : IN unsigned ((DATA_WIDTH - 1) DOWNTO 0);
 
-        O_1 : OUT unsigned ((DATA_WIDTH - 1) DOWNTO 0);
-        O_2 : OUT unsigned ((DATA_WIDTH - 1) DOWNTO 0)
+    O_1 : OUT unsigned ((DATA_WIDTH - 1) DOWNTO 0);
+    O_2 : OUT unsigned ((DATA_WIDTH - 1) DOWNTO 0)
 
-    );
+  );
 END cmp;
 
 ARCHITECTURE Behav OF cmp IS
 
-    SIGNAL s_O_1 : unsigned ((DATA_WIDTH - 1) DOWNTO 0);
-    SIGNAL s_O_2 : unsigned ((DATA_WIDTH - 1) DOWNTO 0);
+  SIGNAL s_O_1 : unsigned ((DATA_WIDTH - 1) DOWNTO 0);
+  SIGNAL s_O_2 : unsigned ((DATA_WIDTH - 1) DOWNTO 0);
 
 BEGIN
 
-    cmp_proc : PROCESS (CLK, RST)
-    BEGIN
-        IF RST = '1' THEN
-            s_O_1 <= (OTHERS => '0');
-            s_O_2 <= (OTHERS => '0');
-        ELSIF CLK = '1' AND CLK'event THEN
-            IF EN = '1' THEN
-                IF I_1 < I_2 THEN
-                    s_O_1 <= I_1;
-                    s_O_2 <= I_2;
-                ELSE
-                    s_O_1 <= (OTHERS => '0');
-                    s_O_2 <= (OTHERS => '0');
-                END IF;
-            END IF;
+  cmp_proc : PROCESS (CLK, RST)
+  BEGIN
+    IF RST = '1' THEN
+      s_O_1 <= (OTHERS => '0');
+      s_O_2 <= (OTHERS => '0');
+    ELSIF CLK = '1' AND CLK'event THEN
+      IF EN = '1' THEN
+        IF I_1 < I_2 THEN
+          s_O_1 <= I_1;
+          s_O_2 <= I_2;
+        ELSE
+          s_O_1 <= (OTHERS => '0');
+          s_O_2 <= (OTHERS => '0');
         END IF;
-    END PROCESS; -- cmp_proc
+      END IF;
+    END IF;
+  END PROCESS; -- cmp_proc
 
-    O_1 <= s_O_1;
-    O_2 <= s_O_2;
+  O_1 <= s_O_1;
+  O_2 <= s_O_2;
 END Behav; -- Behav
