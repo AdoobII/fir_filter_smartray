@@ -13,7 +13,7 @@ ARCHITECTURE behav OF tb_top IS
       CLK : IN STD_LOGIC;
 
       STREAM_EN : IN STD_LOGIC;
-      RESET : IN STD_LOGIC;
+      RST : IN STD_LOGIC;
 
       DATA_IN : IN STD_LOGIC_VECTOR (7 DOWNTO 0);
       DATA_OUT : OUT SIGNED (15 DOWNTO 0)
@@ -24,7 +24,7 @@ ARCHITECTURE behav OF tb_top IS
   SIGNAL CLK : STD_LOGIC := '0';
 
   SIGNAL STREAM_EN : STD_LOGIC := '1';
-  SIGNAL RESET : STD_LOGIC := '0';
+  SIGNAL RST : STD_LOGIC := '0';
 
   SIGNAL DATA_IN : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
 
@@ -41,7 +41,7 @@ BEGIN
   (
     CLK => CLK,
     STREAM_EN => STREAM_EN,
-    RESET => RESET,
+    RST => RST,
     DATA_IN => DATA_IN,
     DATA_OUT => DATA_OUT
   );
@@ -80,9 +80,9 @@ BEGIN
   stim_proc : PROCESS
   BEGIN
     WAIT FOR period * 2;
-    RESET <= '1';
+    RST <= '1';
     WAIT FOR period;
-    RESET <= '0';
+    RST <= '0';
     WAIT FOR period * 20;
     WAIT;
   END PROCESS;
