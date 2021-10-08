@@ -1,1 +1,7 @@
 oss-cad-suite/*
+*.vcd
+*.cf
+*.json
+*.txt
+misc/*
+*.pyc
