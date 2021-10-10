@@ -3,6 +3,9 @@ USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
 
 ENTITY zero_crossing_controller IS
+  GENERIC (
+    WAIT_TIME : STD_LOGIC_VECTOR(15 DOWNTO 0) := x"0090"
+  );
   PORT (
     CLK : IN STD_LOGIC;
     RST : IN STD_LOGIC;
@@ -25,7 +28,7 @@ BEGIN
     IF RST = '1' THEN
       s_EN_OUT <= '0';
     ELSIF CLK = '1' AND CLK'EVENT THEN
-      IF INDEX > X"0090" THEN
+      IF INDEX > WAIT_TIME THEN
         s_EN_OUT <= '1';
       ELSE
         s_EN_OUT <= '0';
