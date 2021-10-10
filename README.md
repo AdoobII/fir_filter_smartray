@@ -10,6 +10,12 @@ get the OSS fpga-toolchain from [this repo](https://github.com/YosysHQ/oss-cad-s
 4. Alternatively you can set a vitual environment by sourcing the shell file as `source /path/to/extraction/dir/environment`
 
 ## Typical VHDL design flow
+# Make
+1. `cd build`
+2. `make elab`
+3. `make run`
+4. `make view`
+
 # Simulation
 1. Start by writing a module and its testbench.
 2. Analyze the module using GHDL `ghdl -a --ieee=synopsys --std=08 /path/to/vhdl_file.vhdl /path/to/testbench.vhdl`.
