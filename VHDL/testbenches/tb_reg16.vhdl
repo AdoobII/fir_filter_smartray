@@ -2,12 +2,12 @@ LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
 USE ieee.numeric_std.ALL;
 
-ENTITY tb_reg16 IS
-END tb_reg16;
+ENTITY tb_reg IS
+END tb_reg;
 
-ARCHITECTURE behav OF tb_reg16 IS
+ARCHITECTURE behav OF tb_reg IS
   --component declaration
-  COMPONENT reg16
+  COMPONENT reg
     GENERIC (
       DATA_WIDTH : INTEGER := 16
     );
@@ -15,26 +15,29 @@ ARCHITECTURE behav OF tb_reg16 IS
       CLOCK : IN STD_LOGIC;
       ENABLE : IN STD_LOGIC;
       RESET : IN STD_LOGIC;
-      D : IN SIGNED ((DATA_WIDTH - 1) DOWNTO 0);
-      Q : OUT SIGNED ((DATA_WIDTH - 1) DOWNTO 0)
+      sRST : IN STD_LOGIC;
+      D : IN STD_LOGIC_VECTOR ((DATA_WIDTH - 1) DOWNTO 0);
+      Q : OUT STD_LOGIC_VECTOR ((DATA_WIDTH - 1) DOWNTO 0)
     );
   END COMPONENT;
   --input signals
-  SIGNAL D : SIGNED(15 DOWNTO 0) := (OTHERS => '0');
+  SIGNAL D : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
   SIGNAL CLOCK : STD_LOGIC := '0';
   SIGNAL ENABLE : STD_LOGIC := '0';
   SIGNAL RESET : STD_LOGIC := '0';
+  SIGNAL sRST : STD_LOGIC := '0';
 
   --output signal
-  SIGNAL Q : SIGNED(15 DOWNTO 0) := (OTHERS => '0');
+  SIGNAL Q : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
 
 BEGIN
-  --instantiation of reg16
-  uut : reg16 PORT MAP
+  --instantiation of reg
+  uut : reg PORT MAP
   (
     D => D,
     CLOCK => CLOCK,
     RESET => RESET,
+    sRST => sRST,
     ENABLE => ENABLE,
     Q => Q
   );
