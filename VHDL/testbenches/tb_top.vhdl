@@ -11,27 +11,23 @@ ARCHITECTURE behav OF tb_top IS
   COMPONENT TOP
     PORT (
       CLK : IN STD_LOGIC;
-
-      STREAM_EN : IN STD_LOGIC;
       RST : IN STD_LOGIC;
-
-      DATA_IN : IN STD_LOGIC_VECTOR (7 DOWNTO 0);
-      DATA_OUT : OUT SIGNED (15 DOWNTO 0)
+      CTRL : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
+      DATA_IN : IN STD_LOGIC_VECTOR(7 DOWNTO 0);
+      BUSY : OUT STD_LOGIC;
+      DATA_OUT : OUT STD_LOGIC_VECTOR (15 DOWNTO 0)
     );
   END COMPONENT;
 
-  --input signals
+  --signals
   SIGNAL CLK : STD_LOGIC := '0';
-
-  SIGNAL STREAM_EN : STD_LOGIC := '1';
   SIGNAL RST : STD_LOGIC := '0';
+  SIGNAL CTRL : STD_LOGIC_VECTOR(1 DOWNTO 0);
+  SIGNAL DATA_IN : STD_LOGIC_VECTOR(7 DOWNTO 0);
+  SIGNAL BUSY : STD_LOGIC;
+  SIGNAL DATA_OUT : STD_LOGIC_VECTOR(15 DOWNTO 0);
 
-  SIGNAL DATA_IN : STD_LOGIC_VECTOR(7 DOWNTO 0) := (OTHERS => '0');
-
-  --output signal
-  SIGNAL DATA_OUT : SIGNED(15 DOWNTO 0) := (OTHERS => '0');
-
-  CONSTANT period : TIME := 20 ns;
+  CONSTANT period : TIME := 5 ns;
   SIGNAL i : INTEGER := 0;
 
   --input stream
@@ -40,9 +36,10 @@ BEGIN
   uut : TOP PORT MAP
   (
     CLK => CLK,
-    STREAM_EN => STREAM_EN,
     RST => RST,
+    CTRL => CTRL,
     DATA_IN => DATA_IN,
+    BUSY => BUSY,
     DATA_OUT => DATA_OUT
   );
 
@@ -53,26 +50,27 @@ BEGIN
   END PROCESS; -- clock_proc
 
   data_feeding_proc : PROCESS (CLK)
-    FILE Fin : TEXT OPEN READ_MODE IS "VHDL/test_vectors/i_top_test.txt";
+    FILE Fin : TEXT OPEN READ_MODE IS "../VHDL/test_vectors/i_top_test.txt";
     VARIABLE line_pointer : LINE;
-    VARIABLE current_DATA_IN : STD_LOGIC_VECTOR (7 DOWNTO 0);
+    VARIABLE current_DATA_IN : STD_LOGIC_VECTOR (11 DOWNTO 0);
   BEGIN
     IF CLK = '1' THEN
       IF NOT endfile(Fin) THEN
         readline(Fin, line_pointer);
-        read(line_pointer, current_DATA_IN);
-        DATA_IN <= current_DATA_IN;
+        hex_read(line_pointer, current_DATA_IN);
+        DATA_IN <= current_DATA_IN(7 DOWNTO 0);
+        CTRL <= current_DATA_IN(9 DOWNTO 8);
       END IF;
     END IF;
   END PROCESS;
 
   data_out_proc : PROCESS (CLK)
-    FILE Fout : TEXT OPEN WRITE_MODE IS "VHDL/test_vectors/o_top_testout.txt";
+    FILE Fout : TEXT OPEN WRITE_MODE IS "../VHDL/test_vectors/o_top_testout.txt";
     VARIABLE line_pointer : LINE;
     VARIABLE current_DATA_OUT : STD_LOGIC_VECTOR (15 DOWNTO 0);
   BEGIN
     IF CLK = '1' THEN
-      write(line_pointer, DATA_OUT);
+      hex_write(line_pointer, DATA_OUT);
       writeline(Fout, line_pointer);
     END IF;
   END PROCESS;
