@@ -5,3 +5,8 @@ oss-cad-suite/*
 *.txt
 misc/*
 *.pyc
+*.o
+build/tb*
+build/top
+build/zero_crossing
+build/input_controller
