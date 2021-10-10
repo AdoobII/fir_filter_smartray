@@ -9,8 +9,8 @@ ENTITY shift_right_op IS
   );
 
   PORT (
-    I : IN UNSIGNED((DATA_WIDTH - 1) DOWNTO 0);
-    O : OUT UNSIGNED((DATA_WIDTH - 1) DOWNTO 0)
+    I : IN STD_LOGIC_VECTOR((DATA_WIDTH - 1) DOWNTO 0);
+    O : OUT STD_LOGIC_VECTOR((DATA_WIDTH - 1) DOWNTO 0)
   );
 END shift_right_op;
 
@@ -18,6 +18,6 @@ ARCHITECTURE Behav OF shift_right_op IS
 BEGIN
   shift_proc : PROCESS (I)
   BEGIN
-    O <= shift_right(unsigned(I), SHIFT_AMT);
+    O <= STD_LOGIC_VECTOR(shift_right(unsigned(I), SHIFT_AMT));
   END PROCESS; -- shift_proc
 END Behav; -- Behav

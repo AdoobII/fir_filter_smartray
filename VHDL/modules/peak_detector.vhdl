@@ -4,24 +4,23 @@ USE ieee.std_logic_1164.ALL;
 
 ENTITY peak_detector IS
   GENERIC (
-    DATA_WIDTH : INTEGER := 16
+    direction : STD_LOGIC := '0' -- 0 -> High peak (default) / 1 -> Low peak
   );
 
   PORT (
     CLK : IN STD_LOGIC;
     EN : IN STD_LOGIC;
     RST : IN STD_LOGIC;
-    direction : IN STD_LOGIC; -- 0 -> High peak (default) / 1 -> Low peak
 
-    I : IN signed ((DATA_WIDTH - 1) DOWNTO 0);
-    O : OUT signed ((DATA_WIDTH - 1) DOWNTO 0)
+    I : IN STD_LOGIC_VECTOR (31 DOWNTO 0);
+    O : OUT STD_LOGIC_VECTOR (15 DOWNTO 0)
 
   );
 END peak_detector;
 
 ARCHITECTURE Behav OF peak_detector IS
 
-  SIGNAL peak_val : signed ((DATA_WIDTH - 1) DOWNTO 0);
+  SIGNAL peak_val : STD_LOGIC_VECTOR (31 DOWNTO 0);
 
 BEGIN
 
@@ -31,10 +30,10 @@ BEGIN
       CASE(direction) IS
 
         WHEN '1' =>
-        peak_val <= x"7FFF";
+        peak_val <= x"00007FFF";
 
         WHEN OTHERS =>
-        peak_val <= x"8001";
+        peak_val <= x"00008001";
 
       END CASE;
     ELSIF CLK = '1' AND CLK'event THEN
@@ -42,12 +41,12 @@ BEGIN
         CASE(direction) IS
 
           WHEN '1' =>
-          IF I < peak_val THEN
+          IF signed(I(15 DOWNTO 0)) < signed(peak_val(15 DOWNTO 0)) THEN
             peak_val <= I;
           END IF;
 
           WHEN OTHERS =>
-          IF I > peak_val THEN
+          IF signed(I(15 DOWNTO 0)) > signed(peak_val(15 DOWNTO 0)) THEN
             peak_val <= I;
           END IF;
         END CASE;
@@ -56,6 +55,6 @@ BEGIN
     END IF;
   END PROCESS; -- detect_peak
 
-  O <= peak_val;
+  O <= peak_val(31 DOWNTO 16);
 
 END Behav; -- Behav

@@ -14,11 +14,11 @@ ENTITY cmp IS
     RST : IN STD_LOGIC;
     EN : IN STD_LOGIC;
 
-    I_1 : IN unsigned ((DATA_WIDTH - 1) DOWNTO 0);
-    I_2 : IN unsigned ((DATA_WIDTH - 1) DOWNTO 0);
+    I_1 : IN STD_LOGIC_VECTOR ((DATA_WIDTH - 1) DOWNTO 0);
+    I_2 : IN STD_LOGIC_VECTOR ((DATA_WIDTH - 1) DOWNTO 0);
 
-    O_1 : OUT unsigned ((DATA_WIDTH - 1) DOWNTO 0);
-    O_2 : OUT unsigned ((DATA_WIDTH - 1) DOWNTO 0)
+    O_1 : OUT STD_LOGIC_VECTOR ((DATA_WIDTH - 1) DOWNTO 0);
+    O_2 : OUT STD_LOGIC_VECTOR ((DATA_WIDTH - 1) DOWNTO 0)
 
   );
 END cmp;
@@ -37,9 +37,9 @@ BEGIN
       s_O_2 <= (OTHERS => '0');
     ELSIF CLK = '1' AND CLK'event THEN
       IF EN = '1' THEN
-        IF I_1 < I_2 THEN
-          s_O_1 <= I_1;
-          s_O_2 <= I_2;
+        IF unsigned(I_1) < unsigned(I_2) THEN
+          s_O_1 <= unsigned(I_1);
+          s_O_2 <= unsigned(I_2);
         ELSE
           s_O_1 <= (OTHERS => '0');
           s_O_2 <= (OTHERS => '0');
@@ -48,6 +48,6 @@ BEGIN
     END IF;
   END PROCESS; -- cmp_proc
 
-  O_1 <= s_O_1;
-  O_2 <= s_O_2;
+  O_1 <= STD_LOGIC_VECTOR(s_O_1);
+  O_2 <= STD_LOGIC_VECTOR(s_O_2);
 END Behav; -- Behav
